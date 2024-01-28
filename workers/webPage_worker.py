@@ -1,5 +1,5 @@
 from worker import Worker
-from data_sources.webPage_wrapper import WebPageLink
+from data_sources.webPage import WebPageLink
 from typing import List
 from instances.node import OperationNode
 

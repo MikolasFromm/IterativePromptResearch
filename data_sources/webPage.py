@@ -11,12 +11,12 @@ click_operation = Operation('click', 'clicks on the link')
 
 class WebPageLink(OperationNode):
     """An implementation of a webpage node representing a link on a webpage."""
-    def __init__(self, absolute_url : str, visited_urls : Set[str], tree_depth : int, textual_name : str, optional_content : Optional[node.NodeContent] = None):
+    def __init__(self, absolute_url : str, visited_urls : Set[str], tree_depth : int, textual_name : str, optional_content : Optional[NodeContent] = None):
         super().__init__(click_operation, tree_depth, textual_name, optional_content, absolute_url)
         self.absolute_url = absolute_url
         self.captured_urls = visited_urls.copy()
 
-    def expand(self) -> List['Node']:
+    def expand(self, mode : int) -> List['Node']:
         """Expands the node by downloadning the page, 
         filtering out all links and creating children nodes for each link, 
         without expanding them."""
