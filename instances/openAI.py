@@ -1,6 +1,6 @@
 import os
 from openai import OpenAI
-from openAI_secret import API_KEY
+from instances.openAI_secret import API_KEY
 
 class OpenAIWrapper:
     def __init__(self, system_message : str):

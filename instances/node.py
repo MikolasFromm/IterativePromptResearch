@@ -43,7 +43,7 @@ class Node:
         return self.children[index]
 
     @abstractmethod
-    def expand(self, mode : int) -> List['Node']:
+    def expand(self, mode : int, remaining_depth = 1, cache = {}) -> List['Node']:
         """Expands the node to the next depth, implementation specific."""
         raise NotImplementedError
     
