@@ -18,10 +18,16 @@ class WebPageLink(OperationNode):
         self.captured_urls = visited_urls.copy()
         self.expanded = False
 
-    def expand(self, mode : int, remaining_depth : int = 1, cache : {str, Node} = {}) -> List['Node']:
+    def expand(self, mode : int, params : {str, }, cache : {str, Node} = {}) -> List['Node']:
         """Expands the node by downloadning the page, 
         filtering out all links and creating children nodes for each link, 
         without expanding them."""
+
+        if (self.expanded):
+            return self.children
+        
+        remaining_depth = params['look_ahead_depth']
+        isolated_domain = params['isolated_domain']
 
         match mode:
             case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.LOOK_AHEAD:
@@ -34,7 +40,7 @@ class WebPageLink(OperationNode):
                         if (
                             'href' in link.attrs 
                             and link.text.strip() != ''
-                            and not self.__link_blacklisted(link.attrs['href'], base_url=self.absolute_url)
+                            and not self.__link_blacklisted(link.attrs['href'], base_url=self.absolute_url if isolated_domain else None)
                             ):
                             url = self.__get_absolute_url(link.attrs['href'], self.absolute_url)
                             if (url not in self.captured_urls):

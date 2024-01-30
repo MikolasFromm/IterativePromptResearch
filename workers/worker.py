@@ -49,11 +49,7 @@ class Worker:
 
                 while True:
                 
-                    current_node.expand(
-                        self.mode, 
-                        self.params['look_ahead_depth'] if 'look_ahead_depth' in self.params else 1,
-                        cache
-                        )
+                    current_node.expand(self.mode, self.params, cache)
 
                     if (current_node.child_count() == 0): 
                         print(self.get_final_steps_desc())
