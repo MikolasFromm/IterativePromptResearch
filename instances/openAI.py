@@ -3,14 +3,11 @@ from openai import OpenAI
 from instances.openAI_secret import API_KEY
 
 class OpenAIWrapper:
-    def __init__(self, system_message : str):
+    def __init__(self, keep_whole_context : bool, system_message : str):
         self.client = OpenAI(api_key=API_KEY)
-        self.messages = [
-            {
-                "role": "system", 
-                "content": system_message
-            }
-        ]
+        self.keep_whole_context = keep_whole_context
+        self.system_message = system_message
+        self.messages = [self.__create_system_message(self.system_message)]
 
     def __create_user_message(self, content):
         return {"role": "user", "content": content}
@@ -22,7 +19,13 @@ class OpenAIWrapper:
         return {"role": "assistant", "content": content}
     
     def __add_message(self, content):
-        self.messages.append(self.__create_user_message(content))
+        if (self.keep_whole_context):
+            self.messages.append(self.__create_user_message(content))
+        else:
+            self.messages = [
+                self.__create_system_message(self.system_message),
+                self.__create_user_message(content) 
+            ]
 
     def __get_response(self):
         full_response = self.client.chat.completions.create(

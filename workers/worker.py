@@ -6,7 +6,7 @@ from consts import *
 
 
 class Worker:
-    def __init__(self, mode : int, query : str, params : {str, str}):
+    def __init__(self, mode : int, query : str, params : {str, }):
         self.mode = mode
         self.query = query
         self.params = params
@@ -43,10 +43,9 @@ class Worker:
         if (current_node is None):
             raise Exception("Initial node not set")
         
+        cache = {}
         match self.mode:
             case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.LOOK_AHEAD:
-                cache = {}
-
                 while True:
                 
                     current_node.expand(self.mode, self.params, cache)

@@ -22,9 +22,6 @@ class WebPageLink(OperationNode):
         """Expands the node by downloadning the page, 
         filtering out all links and creating children nodes for each link, 
         without expanding them."""
-
-        if (self.expanded):
-            return self.children
         
         remaining_depth = params['look_ahead_depth']
         isolated_domain = params['isolated_domain']
@@ -44,7 +41,7 @@ class WebPageLink(OperationNode):
                             ):
                             url = self.__get_absolute_url(link.attrs['href'], self.absolute_url)
                             if (url not in self.captured_urls):
-                                temp_links[url] = re.sub('[\n\s]+',' ',link.text.strip())
+                                temp_links[url] = re.sub('[\\n\\s]+',' ',link.text.strip())
                                 self.captured_urls.add(url)
 
                     for link in temp_links.keys(): ## create children nodes, now with "self.captured_urls" having all the urls that are reachable from the current node
@@ -54,16 +51,17 @@ class WebPageLink(OperationNode):
                             nodePage.tree_depth = self.tree_depth + 1
                             self.children.append(nodePage)
                         else:
-                            nodePage = WebPageLink(link, self.captured_urls, self.tree_depth + 1, temp_links[link])
-                            cache[link] = nodePage
-                            self.children.append(nodePage)
+                            self.children.append(WebPageLink(link, self.captured_urls, self.tree_depth + 1, temp_links[link]))
+
+                    if (self.absolute_url not in cache): ## add current expanded node to the cache if not present already
+                        cache[self.absolute_url] = self
 
                     if (remaining_depth > 1): ## if remaining depth is 1, we are currently on the last page
                         for child in self.children:
-                            if (not child.expanded):
-                                child.expand(mode, remaining_depth - 1)
+                            new_params = deepcopy(params)
+                            new_params['look_ahead_depth'] = remaining_depth - 1
+                            child.expand(mode, new_params, cache)
 
-                    self.expanded = True
                     return self.children
                 
                 except Exception as e:
@@ -76,6 +74,9 @@ class WebPageLink(OperationNode):
     def __get_absolute_url(self, input : str, current_url : str | None) -> str:
         """Tries to merge the relative input url with the current url prefix to get the absolute url. 
         If no current url is provided, the input is returned."""
+
+        result = ""
+        
         if (current_url is None):
             return input
         
@@ -85,34 +86,41 @@ class WebPageLink(OperationNode):
         if ('#' in input): ## remove any anchors from the url
             input = input.split('#')[0]
 
-        if (input.startswith('/')):
-             ## try to cut as much from the current url as possible
+        if (input.startswith('/')):  ## try to cut as much from the current url as possible
             current_split = [x for x in current_url.split('/') if x != '']
             input_split = [x for x in input.split('/') if x != '']
             
             for i in range(len(current_split)):
+                if (len(input_split) == 0):
+                    return current_url
                 if (current_split[i] == input_split[0]):
                     input_split.pop(0)
-            
+
             input = '/'.join(input_split)
 
             if (current_url.endswith('/')):
-                return current_url + input
+                result = current_url + input
             else:
-                return current_url + '/' + input
+                result = current_url + '/' + input
             
-        elif (input.startswith('./')):
-            return current_url + input.strip('./')
+        elif (input.startswith('./')): ## just append the relative to the current
+            result = current_url + input.strip('./')
         
-        else:
-            return input
+        else: ## otherwise legit URL given
+            result = input
+        
+        if (not result.endswith('/') ## always add the trailing slash if not present
+            and not "." in result.split('/')[-1]): ## only except if file is given
+            result += '/'
+
+        return result
     
     def __link_blacklisted(self, url : str, base_url : str | None) -> bool:
         """Checks if the url is blacklisted. Blacklist is very basic."""
         ## keep relatives
         if (
             url.startswith('./')
-            or url.startswith('/')
+            or (url != "/" and url.startswith('/'))
         ):
             return False
         
