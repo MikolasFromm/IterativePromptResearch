@@ -1,7 +1,7 @@
 from workers.worker import Worker
 from data_sources.webPage_node import WebPageLink
 from typing import List
-from instances.node import OperationNode
+from instances.node import OperationNode, Node
 from consts import WORKER_MODE
 
 class WebpageWorker(Worker):
@@ -10,6 +10,7 @@ class WebpageWorker(Worker):
         self.reached_end = False
         self.current_path = List['OperationNode']
         self.initial_node = WebPageLink(params['url'], set([params['url']]), 0, "Base page")
+        self.num_of_keywords = 40
 
     def __str__(self):
         return f"WorkerWebPage: {self.params['url']}"
@@ -28,7 +29,6 @@ class WebpageWorker(Worker):
                 f"next possible link names:\n"
                 f"{''.join(next_moves)}"
                 )
-                return prompt
             case WORKER_MODE.LOOK_AHEAD:
                 for i, child in enumerate(current_node.children):
                     next_moves.append(f"\t{i}: {child.textual_name}\n")
@@ -40,6 +40,33 @@ class WebpageWorker(Worker):
                 f"next possible link names:\n"
                 f"{''.join(next_moves)}"
                 )
-                print(prompt)
-
+            case WORKER_MODE.KEYWORD_GEN_AND_MATCH:
+                prompt = (
+                f"query: {initial_query}\n"
+                f"For the query above, please write {self.num_of_keywords} keywords that might be relevant names of links to visit in an upcoming search. Prefere single words. Use the language of the query!\n"
+                f"Please separate the keywords with semicolon. Dont write anything else!\n"
+                )
+        print(prompt)
         return prompt
+    
+    def process_llm_response(self, current_node : Node, response : str, mode : int) -> Node | List['str'] | None:
+        response = response.strip()
+
+        match mode:
+            case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.LOOK_AHEAD:
+                if (response == "-1"):
+                    return None
+
+                if not response.isdigit():
+                    raise Exception(f"Response {response} is not digit")
+                
+                int_response = int(response)
+
+                if (int_response == -1):
+                    return None
+                else:
+                    return current_node.get_child(int_response)
+            case WORKER_MODE.KEYWORD_GEN_AND_MATCH:
+                keywords = response.split(";")
+                keywords = [x.strip().casefold() for x in keywords]
+                return keywords

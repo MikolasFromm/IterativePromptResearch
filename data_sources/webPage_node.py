@@ -7,6 +7,7 @@ from consts import *
 from copy import deepcopy
 
 PAGE_LOAD_TIMEOUT = 2
+MAX_DEPTH = 6
 
 click_operation = Operation('click', 'clicks on the link')
 
@@ -22,52 +23,61 @@ class WebPageLink(OperationNode):
         """Expands the node by downloadning the page, 
         filtering out all links and creating children nodes for each link, 
         without expanding them."""
+
+        remaining_depth = params['look_ahead_depth'] if mode == WORKER_MODE.LOOK_AHEAD else 1
+        isolated_domain = params['isolated_domain'] if 'isolated_domain' in params else False
         
-        remaining_depth = params['look_ahead_depth']
-        isolated_domain = params['isolated_domain']
+        if (mode == WORKER_MODE.KEYWORD_GEN_AND_MATCH):
+            remaining_depth = MAX_DEPTH - self.tree_depth
 
-        match mode:
-            case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.LOOK_AHEAD:
-                try:
-                    page_content = requests.get(self.absolute_url, timeout=PAGE_LOAD_TIMEOUT).text ## get the content of the page
-                    a_tags = BeautifulSoup(page_content, 'html.parser').find_all('a') ## get all links from the page
+        if (mode == WORKER_MODE.KEYWORD_GEN_AND_MATCH and self.tree_depth > MAX_DEPTH): ## recursion limit when generating tree based on keywords
+            return []
+        
+        if (not self.expanded):
+            try:
+                page_content = requests.get(self.absolute_url, timeout=PAGE_LOAD_TIMEOUT).text ## get the content of the page
+                a_tags = BeautifulSoup(page_content, 'html.parser').find_all('a') ## get all links from the page
 
-                    temp_links = {} ## temporary dictionary to store the links and their textual representation
-                    for link in a_tags:
-                        if (
-                            'href' in link.attrs 
-                            and link.text.strip() != ''
-                            and not self.__link_blacklisted(link.attrs['href'], base_url=self.absolute_url if isolated_domain else None)
-                            ):
-                            url = self.__get_absolute_url(link.attrs['href'], self.absolute_url)
-                            if (url not in self.captured_urls):
-                                temp_links[url] = re.sub('[\\n\\s]+',' ',link.text.strip())
-                                self.captured_urls.add(url)
+                temp_links = {} ## temporary dictionary to store the links and their textual representation
+                for link in a_tags:
+                    if (
+                        'href' in link.attrs 
+                        and link.text.strip() != ''
+                        and not self.__link_blacklisted(link.attrs['href'], base_url=self.absolute_url if isolated_domain else None)
+                        ):
+                        url = self.__get_absolute_url(link.attrs['href'], self.absolute_url)
+                        if (url not in self.captured_urls):
+                            temp_links[url] = re.sub('[\\n\\s]+',' ',link.text.strip())
+                            self.captured_urls.add(url)
 
-                    for link in temp_links.keys(): ## create children nodes, now with "self.captured_urls" having all the urls that are reachable from the current node
-                        if (link in cache):
-                            nodePage = deepcopy(cache[link])
-                            nodePage.textual_name = temp_links[link]
-                            nodePage.tree_depth = self.tree_depth + 1
-                            self.children.append(nodePage)
-                        else:
-                            self.children.append(WebPageLink(link, self.captured_urls, self.tree_depth + 1, temp_links[link]))
+                if (mode == WORKER_MODE.KEYWORD_GEN_AND_MATCH): ## filtering when generating tree based on keywords
+                    temp_links = {k: v for k, v in temp_links.items() if k.strip().casefold() in params['keywords']} ## keywords are stripped and casefolded already
 
-                    if (self.absolute_url not in cache): ## add current expanded node to the cache if not present already
-                        cache[self.absolute_url] = self
+                for link in temp_links.keys(): ## create children nodes, now with "self.captured_urls" having all the urls that are reachable from the current node
+                    if (link in cache):
+                        print(f"Found {link} in cache")
+                        nodePage = deepcopy(cache[link])
+                        nodePage.textual_name = temp_links[link]
+                        nodePage.tree_depth = self.tree_depth + 1
+                        self.children.append(nodePage)
+                    else:
+                        self.children.append(WebPageLink(link, self.captured_urls, self.tree_depth + 1, temp_links[link]))
 
-                    if (remaining_depth > 1): ## if remaining depth is 1, we are currently on the last page
-                        for child in self.children:
-                            new_params = deepcopy(params)
-                            new_params['look_ahead_depth'] = remaining_depth - 1
-                            child.expand(mode, new_params, cache)
+                if (self.absolute_url not in cache): ## add current expanded node to the cache if not present already
+                    cache[self.absolute_url] = self
+                    
+            except Exception as e:
+                print(f"Error while expanding node {self.textual_name}: {e}")
+                return []
+        
+        if (remaining_depth > 1): ## if remaining depth is 1, we are currently on the last page
+            for child in self.children:
+                new_params = deepcopy(params)
+                new_params['look_ahead_depth'] = remaining_depth - 1
+                child.expand(mode, new_params, cache)
 
-                    return self.children
+        return self.children
                 
-                except Exception as e:
-                    print(f"Error while expanding node {self.textual_name}: {e}")
-                    return []
-
     def get_final_str_desc(self):
         return f"{self.textual_name} : {self.alternative_id}"
     
