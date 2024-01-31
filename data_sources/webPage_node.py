@@ -5,6 +5,7 @@ from typing import Set, List, Optional
 from bs4 import BeautifulSoup
 from consts import *
 from copy import deepcopy
+from nltk.stem.snowball import SnowballStemmer
 
 PAGE_LOAD_TIMEOUT = 2
 MAX_DEPTH = 6
@@ -51,7 +52,12 @@ class WebPageLink(OperationNode):
                             self.captured_urls.add(url)
 
                 if (mode == WORKER_MODE.KEYWORD_GEN_AND_MATCH): ## filtering when generating tree based on keywords
-                    temp_links = {k: v for k, v in temp_links.items() if k.strip().casefold() in params['keywords']} ## keywords are stripped and casefolded already
+                    temp_links = {k: v for k, v in temp_links.items() if any(stemmer.stem(word.strip().casefold()) in params['keywords'] for word in v.split())} ## keywords are stripped and casefolded already
+                
+                if (mode == WORKER_MODE.MATCH_AND_FILTER): ## filtering when matching and filtering
+                    stemmer = SnowballStemmer("english", ignore_stopwords=True)
+                    keywords = [stemmer.stem(x.strip().casefold()) for x in params['query'].split()]
+                    temp_links = {k: v for k, v in temp_links.items() if any(stemmer.stem(word.strip().casefold()) in keywords for word in v.split())}
 
                 for link in temp_links.keys(): ## create children nodes, now with "self.captured_urls" having all the urls that are reachable from the current node
                     if (link in cache):

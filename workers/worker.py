@@ -34,7 +34,8 @@ class Worker:
         
         cache = {}
         match self.mode:
-            case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.LOOK_AHEAD:
+
+            case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.LOOK_AHEAD | WORKER_MODE.MATCH_AND_FILTER:
                 while True:
                     current_node.expand(self.mode, self.params, cache)
 
@@ -54,8 +55,10 @@ class Worker:
                     else:
                         self.steps_so_far += f"{next_node.textual_name} -> "
                         current_node = next_node
+
             case WORKER_MODE.KEYWORD_GEN_AND_MATCH:
-                query = self.create_llm_query(self.query, self.steps_so_far, current_node, self.mode) ## creates the most relevant keywords query for the LLM model
+                ## create the most relevant keywords query for the LLM model
+                query = self.create_llm_query(self.query, self.steps_so_far, current_node, self.mode)
                 response = openAI_wrapper.upload_query(query)
                 keywords = self.process_llm_response(current_node, response, self.mode)
 

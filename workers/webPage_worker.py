@@ -2,6 +2,7 @@ from workers.worker import Worker
 from data_sources.webPage_node import WebPageLink
 from typing import List
 from instances.node import OperationNode, Node
+from nltk.stem.snowball import SnowballStemmer
 from consts import WORKER_MODE
 
 class WebpageWorker(Worker):
@@ -11,6 +12,7 @@ class WebpageWorker(Worker):
         self.current_path = List['OperationNode']
         self.initial_node = WebPageLink(params['url'], set([params['url']]), 0, "Base page")
         self.num_of_keywords = 40
+        self.stemmer = SnowballStemmer("english", ignore_stopwords=True)
 
     def __str__(self):
         return f"WorkerWebPage: {self.params['url']}"
@@ -21,7 +23,7 @@ class WebpageWorker(Worker):
         prompt = ""
 
         match mode:
-            case WORKER_MODE.STEP_BY_STEP:
+            case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.MATCH_AND_FILTER:
                 next_moves = [f"\t{i}: {child.textual_name}\n" for i, child in enumerate(current_node.children)]
                 prompt = (
                 f"query: {initial_query}\n"
@@ -53,7 +55,7 @@ class WebpageWorker(Worker):
         response = response.strip()
 
         match mode:
-            case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.LOOK_AHEAD:
+            case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.LOOK_AHEAD | WORKER_MODE.MATCH_AND_FILTER:
                 if (response == "-1"):
                     return None
 
@@ -68,5 +70,5 @@ class WebpageWorker(Worker):
                     return current_node.get_child(int_response)
             case WORKER_MODE.KEYWORD_GEN_AND_MATCH:
                 keywords = response.split(";")
-                keywords = [x.strip().casefold() for x in keywords]
+                keywords = [self.stemmer.stem(x.strip().casefold()) for x in keywords]
                 return keywords
