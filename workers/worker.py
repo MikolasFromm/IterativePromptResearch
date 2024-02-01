@@ -24,7 +24,7 @@ class Worker:
         raise NotImplementedError
     
     def get_final_steps_desc(self):
-        return self.steps_so_far.strip(" -> ")
+        return f"Path: {self.steps_so_far.strip(" -> ")}"
 
     def execute(self, openAI_wrapper : OpenAIWrapper):
         current_node = self.initial_node

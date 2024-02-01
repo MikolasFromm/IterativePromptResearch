@@ -1,5 +1,6 @@
 from instances.openAI import OpenAIWrapper
 from workers.factory import WorkerFactory
+from data_sources.worldBank.worldBank import WorldBank
 from consts import WORKER_TYPE, WORKER_MODE
 
 if __name__ == "__main__":
@@ -44,19 +45,21 @@ if __name__ == "__main__":
     #     system_message="You are an assistant that is trying to find the best link to find a page about a topic. You can not ask any questions, you can only suggest links to the user BY WRITING THE NUMBER OF THE BEST LINK. If YOU ARE FINISHED or YOU DONT KNOW, return -1. At the beginning, you are given a query and you should generate keywords that might be relevant to the query."
     #     )
     
-    worker = WorkerFactory().create(
-        WORKER_TYPE.WEBPAGE, 
-        {
-            'mode': WORKER_MODE.MATCH_AND_FILTER, 
-            'query': 'Find their investing strategies.', 
-            'url': 'https://www.wood.com/',
-            'isolated_domain': False
-        })
+    # worker = WorkerFactory().create(
+    #     WORKER_TYPE.WEBPAGE, 
+    #     {
+    #         'mode': WORKER_MODE.MATCH_AND_FILTER, 
+    #         'query': 'Find their investing strategies.', 
+    #         'url': 'https://www.wood.com/',
+    #         'isolated_domain': False
+    #     })
     
-    openAI_wrapper = OpenAIWrapper(
-        keep_whole_context=False, 
-        system_message="You are an assistant that is trying to find the best link to find a page about a topic. You can not ask any questions, you can only suggest links to the user BY WRITING THE NUMBER OF THE BEST LINK. If YOU ARE FINISHED or YOU DONT KNOW, return -1."
-        )
+    # openAI_wrapper = OpenAIWrapper(
+    #     keep_whole_context=False, 
+    #     system_message="You are an assistant that is trying to find the best link to find a page about a topic. You can not ask any questions, you can only suggest links to the user BY WRITING THE NUMBER OF THE BEST LINK. If YOU ARE FINISHED or YOU DONT KNOW, return -1."
+    #     )
 
-    ## execute the worker
-    worker.execute(openAI_wrapper)
+    # ## execute the worker
+    # worker.execute(openAI_wrapper)
+
+    wb = WorldBank()
