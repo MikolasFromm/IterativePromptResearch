@@ -5,18 +5,17 @@ from typing import Set, List, Optional
 from bs4 import BeautifulSoup
 from consts import *
 from copy import deepcopy
+from instances.node import open_link_operation
 from nltk.stem.snowball import SnowballStemmer
 
 PAGE_LOAD_TIMEOUT = 2
 MAX_DEPTH = 10
 
-click_operation = Operation('click', 'clicks on the link')
-
 class WebPageLink(OperationNode):
     """An implementation of a webpage node representing a link on a webpage."""
     def __init__(self, absolute_url : str, visited_urls : Set[str], tree_depth : int, textual_name : str, mandatory_following_operation: Optional['Operation'] = None, optional_content : Optional[NodeContent] = None):
         super().__init__(
-            operation=click_operation, 
+            operation=open_link_operation, 
             tree_depth=tree_depth, 
             textual_name=textual_name, 
             mandatory_following_operation=mandatory_following_operation, 

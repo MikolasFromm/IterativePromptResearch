@@ -71,3 +71,8 @@ class OperationNode(Node):
         super().__init__(tree_depth, textual_name, optional_content, alternative_id)
         self.operation = operation
         self.mandatory_following_operation = mandatory_following_operation
+
+## static operations
+open_table_operation = Operation('open_table', 'opens the table')
+select_subsection_operation = Operation('select_subsection', 'selects the subsection')
+open_link_operation = Operation('open_link', 'opens the link in the browser')

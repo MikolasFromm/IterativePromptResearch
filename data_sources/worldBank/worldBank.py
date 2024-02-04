@@ -1,4 +1,6 @@
 from typing import List
+from data_sources.worldBank_node import WorldBankNode
+from instances.node import select_subsection_operation, open_table_operation
 import xml.etree.ElementTree as ET
 
 worldbank_namespaces =  {
@@ -20,7 +22,7 @@ class DataSet:
         self.name = name
         self.children: List['DataSet' | 'Table'] = []
 
-    def __isleaf(self):
+    def isleaf(self):
         return len(self.children) == 0
     
     def __str__(self) -> str:
@@ -63,3 +65,18 @@ class WorldBank():
             datasets.append(Table(title))
 
         return datasets
+    
+    def transformToNode(self) -> WorldBankNode:
+        """Transforms the whole WorldBank data source into a WorldBankNode object."""
+        return self.__transformDataSet(self.dataSet, 0)
+    
+    def __transformDataSet(self, dataset : DataSet, depth : int) -> WorldBankNode:
+        """Transforms the given DataSet object into a WorldBankNode object."""
+        node = WorldBankNode(select_subsection_operation, depth, dataset.name)
+        for child in dataset.children:
+            if (child.isleaf()):
+                node.children.append(WorldBankNode(open_table_operation, depth + 1, child.name))
+            else:
+                node.children.append(self.__transformDataSet(child, depth + 1))
+                
+        return node
