@@ -7,7 +7,7 @@ from consts import WORKER_MODE
 
 NUM_OF_KEYWORDS = 40
 
-class worldBankWorker(Worker):
+class WorldBankWorker(Worker):
     def __init__(self, mode : int, query : str, params : {str, }):
         super().__init__(mode, query, params)
         self.current_path : List['OperationNode'] = []

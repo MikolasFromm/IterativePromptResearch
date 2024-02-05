@@ -1,6 +1,6 @@
 from workers.worker import Worker
-from workers.webPage_worker import WebpageWorker
-from workers.worldBank_worker import worldBankWorker
+from workers.webPage.worker import WebpageWorker
+from workers.worldBank.worker import WorldBankWorker
 from consts import *
 
 class WorkerFactory:
@@ -9,6 +9,6 @@ class WorkerFactory:
             case WORKER_TYPE.WEBPAGE:
                 return WebpageWorker(arguments['mode'], arguments['query'], arguments)
             case WORKER_TYPE.WORLDBANK:
-                return worldBankWorker(arguments['mode'], arguments['query'], arguments)
+                return WorldBankWorker(arguments['mode'], arguments['query'], arguments)
             case _:
                 raise Exception("Not implemented")
