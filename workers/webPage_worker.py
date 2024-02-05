@@ -5,13 +5,14 @@ from instances.node import OperationNode, Node
 from nltk.stem.snowball import SnowballStemmer
 from consts import WORKER_MODE
 
+NUM_OF_KEYWORDS = 40
+
 class WebpageWorker(Worker):
     def __init__(self, mode : int, query : str, params : {str, str}):
         super().__init__(mode, query, params)
-        self.reached_end = False
-        self.current_path = List['OperationNode']
-        self.initial_node = WebPageLink(params['url'], set([params['url']]), 0, "Base page")
-        self.num_of_keywords = 40
+        self.reached_end : bool = False
+        self.current_path : List['OperationNode'] = []
+        self.initial_node : Node = WebPageLink(params['url'], set([params['url']]), 0, "Base page")
         self.stemmer = SnowballStemmer("english", ignore_stopwords=True)
 
     def __str__(self):
@@ -45,7 +46,7 @@ class WebpageWorker(Worker):
             case WORKER_MODE.KEYWORD_GEN_AND_MATCH:
                 prompt = (
                 f"query: {initial_query}\n"
-                f"For the query above, please write {self.num_of_keywords} keywords that might be relevant names of links to visit in an upcoming search. Prefere single words. Use the language of the query!\n"
+                f"For the query above, please write {NUM_OF_KEYWORDS} keywords that might be relevant names of links to visit in an upcoming search. Prefere single words. Use the language of the query!\n"
                 f"Please separate the keywords with semicolon. Dont write anything else!\n"
                 )
         print(prompt)
