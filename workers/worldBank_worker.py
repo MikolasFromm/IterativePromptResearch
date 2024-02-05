@@ -1,6 +1,6 @@
 from workers.worker import Worker
 from typing import List
-from data_sources.worldBank.worldBank import WorldBank
+from data_sources.worldBank.factory import WorldBankFactory
 from instances.node import OperationNode, Node
 from nltk.stem.snowball import SnowballStemmer
 from consts import WORKER_MODE
@@ -10,11 +10,10 @@ NUM_OF_KEYWORDS = 40
 class worldBankWorker(Worker):
     def __init__(self, mode : int, query : str, params : {str, }):
         super().__init__(mode, query, params)
-        self.dataSet = WorldBank().dataSet
         self.current_path : List['OperationNode'] = []
         self.reached_end : bool = False
         self.stemmer : SnowballStemmer = SnowballStemmer("english", ignore_stopwords=True)
-        self.initial_node : Node = self.dataSet
+        self.initial_node : Node = WorldBankFactory().transformToNode()
 
     def __str__(self):
         return f"WorkerWorldBank: {self.query}"

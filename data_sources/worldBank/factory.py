@@ -1,5 +1,5 @@
 from typing import List
-from data_sources.worldBank_node import WorldBankNode
+from data_sources.worldBank.node import WorldBankNode
 from instances.node import select_subsection_operation, open_table_operation
 import xml.etree.ElementTree as ET
 
@@ -31,7 +31,7 @@ class DataSet:
     def __repr__(self) -> str:
         return self.__str__()
 
-class WorldBank():
+class WorldBankFactory():
     def __init__(self):
         """Initializes the WorldBank data source. Loads the whole table of contents."""
         self.dataSet = self.__parse_xml_tree('data_sources/worldBank/table_of_contents.xml')

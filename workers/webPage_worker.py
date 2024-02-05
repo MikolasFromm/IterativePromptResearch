@@ -1,5 +1,5 @@
 from workers.worker import Worker
-from data_sources.webPage_node import WebPageLink
+from data_sources.webPage.node import WebPageLink
 from typing import List
 from instances.node import OperationNode, Node
 from nltk.stem.snowball import SnowballStemmer

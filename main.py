@@ -1,6 +1,6 @@
 from instances.openAI import OpenAIWrapper
 from workers.factory import WorkerFactory
-from data_sources.worldBank.worldBank import WorldBank
+from data_sources.worldBank.factory import WorldBankFactory
 from consts import WORKER_TYPE, WORKER_MODE
 
 if __name__ == "__main__":
