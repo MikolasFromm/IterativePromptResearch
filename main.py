@@ -61,5 +61,3 @@ if __name__ == "__main__":
 
     # ## execute the worker
     # worker.execute(openAI_wrapper)
-
-    wb = WorldBank()

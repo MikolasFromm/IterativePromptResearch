@@ -41,7 +41,7 @@ class WorldBank():
         tree = ET.parse(path)
         root = tree.getroot()
 
-        dataset = DataSet("WorldBank")
+        dataset : DataSet = DataSet("WorldBank")
         dataset.children = self.__parse_root(root)
 
         return dataset
