@@ -57,21 +57,21 @@ class OperationOption:
 
 class Operation:
     """Represents an operation that can be performed on the node. Each node has one operation that can be performed on it."""
-    def __init__(self, name : str, description : str, options: List['OperationOption'] = []):
+    def __init__(self, name : str, description : str, options: List['OperationOption'] = [],  mandatory_following_operation: Optional['Operation'] = None):
         self.name = name
         self.description = description
         self.options = options
+        self.mandatory_following_operation = mandatory_following_operation
 
     def __str__(self):
         return f"Operation: {self.name}"
     
 class OperationNode(Node):
     """Represents a node that has an operation that can be performed on it."""
-    def __init__(self, operation : Operation, tree_depth : int, textual_name : str, mandatory_following_operation: Optional['Operation'] = None, optional_content : Optional[NodeContent] = None,  alternative_id : Optional[str] = None):
+    def __init__(self, operation : Operation, tree_depth : int, textual_name : str, optional_content : Optional[NodeContent] = None,  alternative_id : Optional[str] = None):
         super().__init__(tree_depth, textual_name, optional_content, alternative_id)
         self.operation = operation
-        self.mandatory_following_operation = mandatory_following_operation
-
+        
 ## static operations
 open_table_operation = Operation('open_table', 'opens the table')
 select_subsection_operation = Operation('select_subsection', 'selects the subsection')

@@ -13,12 +13,11 @@ MAX_DEPTH = 10
 
 class WebPageLink(OperationNode):
     """An implementation of a webpage node representing a link on a webpage."""
-    def __init__(self, absolute_url : str, visited_urls : Set[str], tree_depth : int, textual_name : str, mandatory_following_operation: Optional['Operation'] = None, optional_content : Optional[NodeContent] = None):
+    def __init__(self, absolute_url : str, visited_urls : Set[str], tree_depth : int, textual_name : str, optional_content : Optional[NodeContent] = None):
         super().__init__(
             operation=open_link_operation, 
             tree_depth=tree_depth, 
             textual_name=textual_name, 
-            mandatory_following_operation=mandatory_following_operation, 
             optional_content=optional_content, 
             alternative_id=absolute_url
             )
