@@ -13,12 +13,15 @@ MAX_DEPTH = 10
 
 class WebPageLink(OperationNode):
     """An implementation of a webpage node representing a link on a webpage."""
-    def __init__(self, absolute_url : str, visited_urls : Set[str], tree_depth : int, textual_name : str, optional_content : Optional[NodeContent] = None):
+    def __init__(self, 
+                 absolute_url : str, 
+                 visited_urls : Set[str], 
+                 tree_depth : int, 
+                 textual_name : str):
         super().__init__(
             operation=open_link_operation, 
             tree_depth=tree_depth, 
-            textual_name=textual_name, 
-            optional_content=optional_content, 
+            textual_name=textual_name,
             alternative_id=absolute_url
             )
         self.absolute_url = absolute_url
@@ -57,6 +60,7 @@ class WebPageLink(OperationNode):
                             self.captured_urls.add(url)
 
                 if (mode == WORKER_MODE.KEYWORD_GEN_AND_MATCH): ## filtering when generating tree based on keywords
+                    stemmer = SnowballStemmer("english", ignore_stopwords=True)
                     temp_links = {k: v for k, v in temp_links.items() if any(stemmer.stem(word.strip().casefold()) in params['keywords'] for word in v.split())} ## keywords are stripped and casefolded already
                 
                 if (mode == WORKER_MODE.MATCH_AND_FILTER): ## filtering when matching and filtering

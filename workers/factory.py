@@ -1,6 +1,7 @@
 from workers.worker import Worker
 from workers.webPage.worker import WebpageWorker
 from workers.worldBank.worker import WorldBankWorker
+from workers.SQL.worker import SQLWorker
 from consts import *
 
 class WorkerFactory:
@@ -10,5 +11,7 @@ class WorkerFactory:
                 return WebpageWorker(arguments['mode'], arguments['query'], arguments)
             case WORKER_TYPE.WORLDBANK:
                 return WorldBankWorker(arguments['mode'], arguments['query'], arguments)
+            case WORKER_TYPE.SQL:
+                return SQLWorker(arguments['mode'], arguments['query'], arguments)
             case _:
                 raise Exception("Not implemented")

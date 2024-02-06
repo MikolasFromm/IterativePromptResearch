@@ -8,13 +8,14 @@ MAX_DEPTH = 10
 
 class WorldBankNode(OperationNode):
     """An Implementation of a WorldBank node representing a database table operation."""
-    def __init__(self, operation : Operation, tree_depth : int, textual_name : str, optional_content : Optional[NodeContent] = None,  alternative_id : Optional[str] = None):
+    def __init__(self, 
+                 operation : Operation, 
+                 tree_depth : int, 
+                 textual_name : str):
         super().__init__(
             operation=operation, 
             tree_depth=tree_depth, 
-            textual_name=textual_name, 
-            optional_content=optional_content, 
-            alternative_id=alternative_id
+            textual_name=textual_name
             )
         self.expanded = False
 

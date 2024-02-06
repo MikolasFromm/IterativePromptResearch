@@ -47,6 +47,11 @@ class Node:
         """Expands the node to the next depth, implementation specific."""
         raise NotImplementedError
     
+    @abstractmethod
+    def finalize_exapansion(self, child_taken : int, args : {str, }) -> None:
+        """Finalizes the expansion of the node, implementation specific."""
+        pass
+    
 class OperationOption:
     """Represents option for a specific operation. It should be an option that has no specific content."""
     def __init__(self, name : str, description : str, required : bool, argument = None):
@@ -57,21 +62,29 @@ class OperationOption:
 
 class Operation:
     """Represents an operation that can be performed on the node. Each node has one operation that can be performed on it."""
-    def __init__(self, name : str, description : str, options: List['OperationOption'] = [],  mandatory_following_operation: Optional['Operation'] = None):
+    def __init__(self, name : str, description : str, options: List['OperationOption'] = []):
         self.name = name
         self.description = description
         self.options = options
-        self.mandatory_following_operation = mandatory_following_operation
 
     def __str__(self):
         return f"Operation: {self.name}"
     
 class OperationNode(Node):
     """Represents a node that has an operation that can be performed on it."""
-    def __init__(self, operation : Operation, tree_depth : int, textual_name : str, optional_content : Optional[NodeContent] = None,  alternative_id : Optional[str] = None):
+    def __init__(self, 
+                 operation : Operation, 
+                 tree_depth : int, 
+                 textual_name : str, 
+                 optional_content : Optional[NodeContent] = None,  
+                 alternative_id : Optional[str] = None, 
+                 mandatory_following_operation: Optional['OperationNode'] = None, 
+                 predecessor : Optional['OperationNode'] = None):
         super().__init__(tree_depth, textual_name, optional_content, alternative_id)
         self.operation = operation
-        
+        self.mandatory_following_operation = mandatory_following_operation
+        self.predecessor = predecessor
+
 ## static operations
 open_table_operation = Operation('open_table', 'opens the table')
 select_subsection_operation = Operation('select_subsection', 'selects the subsection')
