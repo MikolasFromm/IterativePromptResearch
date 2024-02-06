@@ -161,3 +161,4 @@ cython_debug/
 
 ## OpenAI secret key
 instances/openAI_secret.py
+playground.py
