@@ -18,7 +18,7 @@ class SQLNode(OperationNode):
                  previous_query : Optional[Query] = None,  
                  mandatory_following_operation: Optional['OperationNode'] = None,
                  predecessor : Optional['OperationNode'] = None,
-                 curret_query : Optional[Query] = None):
+                 current_query : Optional[Query] = None):
         super().__init__(
             operation=operation, 
             tree_depth=tree_depth, 
@@ -26,8 +26,8 @@ class SQLNode(OperationNode):
             mandatory_following_operation=mandatory_following_operation,
             predecessor=predecessor
             )
-        self.previous_query : Query = previous_query
-        self.current_query : Query | None = curret_query
+        self.previous_query : Query = previous_query if previous_query else Query()
+        self.current_query : Query | None = current_query
         self.expanded = False
 
     def expand(self, mode : int, params : {str, }, cache : {str : Node} = {}) -> List['Node']:
@@ -50,11 +50,14 @@ class SQLNode(OperationNode):
                     predecessor=self.predecessor
                     ) for option in self.operation.options if option.required
             ]
+            self.expanded = False
+            return self.children
 
         if (mode == WORKER_MODE.KEYWORD_GEN_AND_MATCH):
             remaining_depth = MAX_DEPTH - self.tree_depth
 
         if (mode == WORKER_MODE.KEYWORD_GEN_AND_MATCH and self.tree_depth > MAX_DEPTH): ## recursion limit when generating tree based on keywords
+            self.expanded = True
             return []
 
         if (not self.expanded):
@@ -90,12 +93,14 @@ class SQLNode(OperationNode):
                 new_params['look_ahead_depth'] = remaining_depth - 1
                 child.expand(mode, new_params, cache)
 
+        self.expanded = True
         return self.children
     
     def finalize_exapansion(self, args : [str]) -> None:
         """Finalizes the expansion of the node, implementation specific."""
         self.previous_query = self.current_query(*args)
         self.operation.options = []
+        self.expanded = True
 
     def __get_next_moves(self, query : Query) -> Dict[str, callable]:
         functions = {

@@ -62,15 +62,28 @@ if __name__ == "__main__":
     # ## execute the worker
     # worker.execute(openAI_wrapper)
 
+    # worker = WorkerFactory().create(
+    #     WORKER_TYPE.WORLDBANK, 
+    #     {
+    #         'mode': WORKER_MODE.STEP_BY_STEP, 
+    #         'query': 'Find the page with the work he has done.'
+    #     })
+    # openAI_wrapper = OpenAIWrapper(
+    #     keep_whole_context=False, 
+    #     system_message="You are an assistant that is trying to find the path to find a table about a topic. You can not ask any questions, you can only suggest which subsection should the user open BY WRITING THE NUMBER OF THE BEST SUBSECTION NAME. If YOU ARE FINISHED or YOU DONT KNOW, return -1."
+    #     )
+    
+    # worker.execute(openAI_wrapper)
+
     worker = WorkerFactory().create(
-        WORKER_TYPE.WORLDBANK, 
+        WORKER_TYPE.SQL, 
         {
             'mode': WORKER_MODE.STEP_BY_STEP, 
-            'query': 'Find the page with the work he has done.'
+            'query': 'From table "employees" select all employees with salary higher than 1000.'
         })
     openAI_wrapper = OpenAIWrapper(
         keep_whole_context=False, 
-        system_message="You are an assistant that is trying to find the path to find a table about a topic. You can not ask any questions, you can only suggest which subsection should the user open BY WRITING THE NUMBER OF THE BEST SUBSECTION NAME. If YOU ARE FINISHED or YOU DONT KNOW, return -1."
+        system_message="You are an assistant that is trying to create a best SQL prompt. You can not ask any questions, you can only suggest which operation should the user choose BY WRITING THE NUMBER OF THE BEST SUBSECTION NAME. If YOU ARE FINISHED or YOU DONT KNOW, return -1."
         )
     
     worker.execute(openAI_wrapper)
