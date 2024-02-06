@@ -83,7 +83,7 @@ if __name__ == "__main__":
         })
     openAI_wrapper = OpenAIWrapper(
         keep_whole_context=False, 
-        system_message="You are an assistant that is trying to create a best SQL prompt. You can not ask any questions, you can only suggest which operation should the user choose BY WRITING THE NUMBER OF THE BEST SUBSECTION NAME. If YOU ARE FINISHED or YOU DONT KNOW, return -1."
+        system_message="You are an assistant that is trying to create a best SQL prompt. You can not ask any questions, you can only suggest which operation should the user choose BY WRITING THE NUMBER OF THE BEST SUBSECTION NAME. If YOU ARE FINISHED or YOU DONT KNOW, return -1. EACH SQL PROMPT MUS START WITH 'FROM' statement!"
         )
     
     worker.execute(openAI_wrapper)

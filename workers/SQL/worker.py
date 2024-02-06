@@ -25,13 +25,22 @@ class SQLWorker(Worker):
 
         match mode:
             case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.MATCH_AND_FILTER:
-                next_moves = [f"\t{i}: {child.textual_name}\n" for i, child in enumerate(current_node.children)]
-                prompt = (
-                f"query: {initial_query}\n"
-                f"steps done: {steps_so_far}\n"
-                f"next possible moves names:\n"
-                f"{''.join(next_moves)}"
-                )
+                ## when expecting the LLM to give textual description of the next move
+                if (current_node.textual_reponse_expected()):
+                    prompt = (
+                    f"query: {initial_query}\n"
+                    f"steps done: {steps_so_far}\n"
+                    f"Please {", ".join([option.description for option in current_node.operation.options])} for operation {current_node.textual_name}.\n"
+                    f"Now you are expected to RESPONSE IN WORDS, INSTEAD OF NUMBERS. Be brief, dont write any numbers, separate words by space.\n"
+                    )
+                else:
+                    next_moves = [f"\t{i}: {child.textual_name}\n" for i, child in enumerate(current_node.children)]
+                    prompt = (
+                    f"query: {initial_query}\n"
+                    f"steps done: {steps_so_far}\n"
+                    f"next possible moves names:\n"
+                    f"{''.join(next_moves)}"
+                    )
             case WORKER_MODE.LOOK_AHEAD:
                 for i, child in enumerate(current_node.children):
                     next_moves.append(f"{i}: {self.create_look_ahead_prompt(child, self.params['look_ahead_depth']-1, self.params['look_ahead_depth']-1)}")
@@ -56,6 +65,10 @@ class SQLWorker(Worker):
 
         match mode:
             case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.LOOK_AHEAD | WORKER_MODE.MATCH_AND_FILTER:
+                if (current_node.textual_reponse_expected()):
+                    current_node.finalize_exapansion(response.split())
+                    return current_node
+                
                 if (response == "-1"):
                     return None
                 

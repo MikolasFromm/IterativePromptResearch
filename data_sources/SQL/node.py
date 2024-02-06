@@ -77,7 +77,7 @@ class SQLNode(OperationNode):
                     operation=Operation(
                         name=name, 
                         description=f"SQL operation {name}", 
-                        options=[OperationOption(name=arg, description=f"Fill: {arg}", required=True) for arg in v["args"]]
+                        options=[OperationOption(name=arg, description=f"Fill the following arguments: \"{arg}\"", required=True) for arg in v["args"]]
                     ),
                     tree_depth=self.tree_depth + 1,
                     textual_name=name,

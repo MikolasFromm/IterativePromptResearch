@@ -48,7 +48,7 @@ class Node:
         raise NotImplementedError
     
     @abstractmethod
-    def finalize_exapansion(self, child_taken : int, args : {str, }) -> None:
+    def finalize_exapansion(self, args : [str]) -> None:
         """Finalizes the expansion of the node, implementation specific."""
         pass
     
@@ -84,6 +84,10 @@ class OperationNode(Node):
         self.operation = operation
         self.mandatory_following_operation = mandatory_following_operation
         self.predecessor = predecessor
+
+    def textual_reponse_expected(self) -> bool:
+        """Returns true if the node expects textual response from the user."""
+        return len(self.operation.options) > 0
 
 ## static operations
 open_table_operation = Operation('open_table', 'opens the table')
