@@ -103,6 +103,9 @@ class SQLNode(OperationNode):
         self.operation.options = []
         self.textual_name = arguments
 
+    def get_final_str_desc(self):
+        return self.current_query.__str__()
+
     def __get_next_moves(self, query : Query) -> Dict[str, callable]:
         functions = {
             func: {
