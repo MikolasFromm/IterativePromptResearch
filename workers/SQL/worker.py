@@ -97,5 +97,5 @@ class SQLWorker(Worker):
             return prompt
         
         for i, grandchild in enumerate(child.children):
-            prompt += f"{self.create_look_ahead_prompt(grandchild, depth_remaining - 1)}"
+            prompt += f"{self.create_look_ahead_prompt(grandchild, depth_total, depth_remaining - 1)}"
         return prompt

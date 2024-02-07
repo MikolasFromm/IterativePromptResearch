@@ -34,9 +34,7 @@ class WorldBankWorker(Worker):
                 )
             case WORKER_MODE.LOOK_AHEAD:
                 for i, child in enumerate(current_node.children):
-                    next_moves.append(f"\t{i}: {child.textual_name}\n")
-                    for j, grandchild in enumerate(child.children):
-                        next_moves.append(f"\t\t-: {grandchild.textual_name}\n")
+                    next_moves.append(f"{i}: {self.create_look_ahead_prompt(child, self.params['look_ahead_depth']-1, self.params['look_ahead_depth']-1)}")
                 prompt = (
                 f"query: {initial_query}\n"
                 f"steps done: {steps_so_far}\n"
@@ -74,3 +72,13 @@ class WorldBankWorker(Worker):
                 keywords = response.split(";")
                 keywords = [self.stemmer.stem(x.strip().casefold()) for x in keywords]
                 return keywords
+            
+    def create_look_ahead_prompt(self, child : Node, depth_total : int, depth_remaining : int):
+        prompt = f"{''.join(['\t' for _ in range(depth_total - depth_remaining)])}: {child.textual_name}\n"
+        
+        if depth_remaining == 0:
+            return prompt
+        
+        for i, grandchild in enumerate(child.children):
+            prompt += f"{self.create_look_ahead_prompt(grandchild, depth_total, depth_remaining - 1)}"
+        return prompt
