@@ -1,5 +1,5 @@
 from instances.node import *
-from pypika import Query
+from pypika import Query, Field, Order
 from typing import List
 from consts import *
 from typing import Dict
@@ -77,7 +77,7 @@ class SQLNode(OperationNode):
                     operation=Operation(
                         name=name, 
                         description=f"SQL operation {name}", 
-                        options=[OperationOption(name=arg, description=f"Fill the following arguments: \"{arg}\"", required=True) for arg in v["args"]]
+                        options=[OperationOption(name=arg, description=f"\"{arg}\"", required=True) for arg in v["args"]]
                     ),
                     tree_depth=self.tree_depth + 1,
                     textual_name=name,
@@ -98,16 +98,17 @@ class SQLNode(OperationNode):
     
     def finalize_exapansion(self, args : [str]) -> None:
         """Finalizes the expansion of the node, implementation specific."""
-        self.previous_query = self.current_query(*args)
+        arguments = " ".join(args)
+        self.previous_query = self.current_query(arguments)
         self.operation.options = []
-        self.expanded = True
+        self.textual_name = arguments
 
     def __get_next_moves(self, query : Query) -> Dict[str, callable]:
         functions = {
             func: {
                 "func": getattr(query, func), 
                 "args": [arg for arg in getattr(query, func).__code__.co_varnames if arg not in ["cls", "kwargs"]]
-                } for func in dir(query) if callable(getattr(query, func)) and not func.startswith("__") and not func.startswith("_")
+                } for func in dir(query) if callable(getattr(query, func)) and not func.startswith("__") and not func.startswith("_") and hasattr(getattr(query, func), '__code__')
             }
         
         return functions

@@ -30,8 +30,8 @@ class SQLWorker(Worker):
                     prompt = (
                     f"query: {initial_query}\n"
                     f"steps done: {steps_so_far}\n"
-                    f"Please {", ".join([option.description for option in current_node.operation.options])} for operation {current_node.textual_name}.\n"
                     f"Now you are expected to RESPONSE IN WORDS, INSTEAD OF NUMBERS. Be brief, dont write any numbers, separate words by space.\n"
+                    f"Please write the following appropriet arguments: {", ".join([option.description for option in current_node.operation.options])} for operation {current_node.textual_name.upper()}.\n"
                     )
                 else:
                     next_moves = [f"\t{i}: {child.textual_name}\n" for i, child in enumerate(current_node.children)]
@@ -62,6 +62,10 @@ class SQLWorker(Worker):
     
     def process_llm_response(self, current_node : SQLNode, response : str, mode : int) -> Node | List['str'] | None:
         response = response.strip()
+
+        ## workaround to get "from_" as the first node
+        if (current_node.tree_depth == 0):
+            return current_node.get_child(7)
 
         match mode:
             case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.LOOK_AHEAD | WORKER_MODE.MATCH_AND_FILTER:
