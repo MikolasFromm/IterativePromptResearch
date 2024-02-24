@@ -49,5 +49,10 @@ if __name__ == "__main__":
         if (user_input == ""):
             for i, child in enumerate(current_node.children):
                 print(f"\t{i}: {child}")
+        elif (user_input == "b"):
+            if (current_node.predecessor != None):
+                current_node = current_node.predecessor
+        elif (user_input == "q"):
+            current_node = root
         else:
             current_node = current_node.get_child(int(user_input)) 
