@@ -1,8 +1,8 @@
 from types import SimpleNamespace
 
 NUM_OF_KEYWORDS = 40
-MODEL = "gpt-4-0125-preview"
-# MODEL = "gpt-3.5-turbo"
+# MODEL = "gpt-4-0125-preview"
+MODEL = "gpt-3.5-turbo"
 
 WORKER_TYPE = SimpleNamespace()
 WORKER_TYPE.WEBPAGE = 0
