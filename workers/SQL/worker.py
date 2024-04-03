@@ -65,7 +65,7 @@ class SQLWorker(Worker):
 
         ## workaround to get "from_" as the first node
         if (current_node.tree_depth == 0):
-            return current_node.get_child(7)
+            return current_node.get_child(1)
 
         match mode:
             case WORKER_MODE.STEP_BY_STEP | WORKER_MODE.LOOK_AHEAD | WORKER_MODE.MATCH_AND_FILTER:
@@ -97,5 +97,5 @@ class SQLWorker(Worker):
             return prompt
         
         for i, grandchild in enumerate(child.children):
-            prompt += f"{self.create_look_ahead_prompt(grandchild, depth_remaining - 1)}"
+            prompt += f"{self.create_look_ahead_prompt(grandchild, depth_total, depth_remaining - 1)}"
         return prompt

@@ -74,7 +74,7 @@ class WorldBankFactory():
         """Transforms the given DataSet object into a WorldBankNode object."""
         node = WorldBankNode(select_subsection_operation, depth, dataset.name)
         for child in dataset.children:
-            if (child.isleaf()):
+            if (type(child) == Table):
                 node.children.append(WorldBankNode(open_table_operation, depth + 1, child.name))
             else:
                 node.children.append(self.__transformDataSet(child, depth + 1))

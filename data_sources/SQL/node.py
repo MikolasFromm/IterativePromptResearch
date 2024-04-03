@@ -1,5 +1,5 @@
 from instances.node import *
-from pypika import Query, Field, Order
+from data_sources.SQL.builder import Query
 from typing import List
 from consts import *
 from typing import Dict
@@ -77,14 +77,13 @@ class SQLNode(OperationNode):
                     operation=Operation(
                         name=name, 
                         description=f"SQL operation {name}", 
-                        options=[OperationOption(name=arg, description=f"\"{arg}\"", required=True) for arg in v["args"]]
+                        options=[OperationOption(name="args", description=f"Argument of SQL operation {name}", required=True)]
                     ),
                     tree_depth=self.tree_depth + 1,
                     textual_name=name,
-                    previous_query=v["func"] if not v["args"] else self.previous_query, ## if there are no arguments, next move can be added, otherwise the query remains the same until the argument is filled
-                    current_query=v["func"] if v["args"] else None, ## if there are some arguments, saves the current query to be able to fill the arguments
-                    predecessor=self.predecessor if not v["args"] else self ## keep the same predecessor to be able to continue the chain when argument filled
-                ) for name, v in next_moves.items()
+                    previous_query=self.previous_query,
+                    current_query=func,
+                ) for name, func in next_moves.items()
             ]
 
         if (remaining_depth > 1): ## if remaining depth is 1, we are currently on the last page
@@ -104,14 +103,11 @@ class SQLNode(OperationNode):
         self.textual_name = arguments
 
     def get_final_str_desc(self):
-        return self.current_query.__str__()
+        return self.previous_query.__str__()
 
-    def __get_next_moves(self, query : Query) -> Dict[str, callable]:
+    def __get_next_moves(self, query : Query) -> Dict[str, Query]:
         functions = {
-            func: {
-                "func": getattr(query, func), 
-                "args": [arg for arg in getattr(query, func).__code__.co_varnames if arg not in ["cls", "kwargs"]]
-                } for func in dir(query) if callable(getattr(query, func)) and not func.startswith("__") and not func.startswith("_") and hasattr(getattr(query, func), '__code__')
-            }
-        
+            func : getattr(query, func)
+            for func in Query.keywords } 
+
         return functions
