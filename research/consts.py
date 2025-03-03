@@ -2,7 +2,9 @@ from types import SimpleNamespace
 
 NUM_OF_KEYWORDS = 40
 # MODEL = "gpt-4-0125-preview"
-MODEL = "gpt-3.5-turbo"
+# MODEL = "gpt-3.5-turbo"
+# MODEL = "gemini-1.0-pro"
+MODEL = "LLM3-AMD-MI210.deepseek-r1:70b"
 
 WORKER_TYPE = SimpleNamespace()
 WORKER_TYPE.WEBPAGE = 0
